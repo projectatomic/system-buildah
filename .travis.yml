@@ -4,5 +4,6 @@ python:
 script:
   - "pip install -r test-requirements.txt"
   - "python setup.py flake8"
+  - "pytest -v"
 notifications:
   email: false

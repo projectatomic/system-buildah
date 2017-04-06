@@ -69,12 +69,15 @@ def _pushd(dir):
     return lambda: os.chdir(original_cwd)
 
 
-@click.command('generate-files')
+@click.command('generate-files', short_help='Generate system container files')
 @click.option('--output', '-o', prompt='Directory to write in', default='.')
 @click.option('--description', '-d', prompt='Description of container')
+@click.option(
+    '--config', '-c', help='Options to pass to ocitools generate. Example: '
+    '-c "--cwd=/tmp --os=linux"')
 @click.option('--default', '-D', multiple=True,
-              help='Default values in the form of key=value')
-def generate_files(output, description, default):
+              help='Default manifest values in the form of key=value')
+def generate_files(output, description, config, default):
     """
     Generates manifest.json, config.template, and service.template
     for a system container.
@@ -103,7 +106,14 @@ def generate_files(output, description, default):
     temp_dir = tempfile.mkdtemp()
     _popd = _pushd(temp_dir)
     try:
-        subprocess.check_call(['ocitools', 'generate'])
+        ocitools_cmd = ['ocitools', 'generate']
+        for item in config.split(' '):
+            try:
+                ocitools_cmd = ocitools_cmd + item.split('=')
+            except ValueError as error:
+                click.echo('{} not in a=b format. Skipping...'.format(item))
+        click.echo(ocitools_cmd)
+        subprocess.check_call(ocitools_cmd)
         config_out = os.path.sep.join([output, 'config.json.template'])
         shutil.move('config.json', config_out)
     except subprocess.CalledProcessError as error:
@@ -114,7 +124,7 @@ def generate_files(output, description, default):
         shutil.rmtree(temp_dir)
 
 
-@click.command('generate-dockerfile')
+@click.command('generate-dockerfile', short_help='Generate a new Dockerfile')
 @click.argument('name', required=True)
 @click.option('--from-base', '-f', default='centos:latest')
 @click.option('--maintainer', '-m', default='{}@{}'.format(
@@ -143,7 +153,7 @@ def generate_dockerfile(
         dockerfile.write(rendered)
 
 
-@click.command('build')
+@click.command('build', short_help='Build a new image')
 @click.option('--path', '-p', default='.')
 @click.argument('tag', required=True)
 def build(path, tag):
@@ -157,7 +167,7 @@ def build(path, tag):
         _popd()
 
 
-@click.command('tar')
+@click.command('tar', short_help='Export image to a tar file')
 @click.argument('image', required=True)
 def docker_image_to_tar(image):
     try:

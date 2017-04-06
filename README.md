@@ -14,10 +14,12 @@ Simple toolbox for building system containers.
 ## Example
 
 ```shell
-$ syscontainer-build generate-files --default=variable=value -D=another=anothervalue --output new_container_image
+$ syscontainer-build generate-files \
+    --default=variable=value -D=another=anothervalue \
+    --config="--hostname=confighost --cwd=/root" \
+    --output new_container_image
 $ syscontainer-build generate-dockerfile --from-base fedora:latest --output new_container_image
-Container Name: mycontainer
-Summary: This is my container
+Summary: This is my image
 Help: Help text would go here
 $ syscontainer-build build --path new_container_image my_system_container_image
 [...]

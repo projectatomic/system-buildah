@@ -89,9 +89,9 @@ def _pushd(dir):
 
 
 @click.command('generate-files')
-@click.option('--output', prompt='Directory to write in', default='.')
-@click.option('--description', prompt='Description of container')
-@click.option('--default', multiple=True,
+@click.option('--output', '-o', prompt='Directory to write in', default='.')
+@click.option('--description', '-d', prompt='Description of container')
+@click.option('--default', '-D', multiple=True,
               help='Default values in the form of key=value')
 def generate_files(output, description, default):
     """
@@ -130,18 +130,18 @@ def generate_files(output, description, default):
 
 
 @click.command('generate-dockerfile')
-@click.option('--name', prompt='Container Name')
-@click.option('--from-base', default='centos:latest')
-@click.option('--maintainer', default='{}@{}'.format(
+@click.argument('name', required=True)
+@click.option('--from-base', '-f', default='centos:latest')
+@click.option('--maintainer', '-m', default='{}@{}'.format(
     os.getenv('USER', 'UNKNOWN'), os.getenv('HOSTNAME', 'UNKNOWN')))
-@click.option('--license', default='UNKNOWN')
-@click.option('--summary', prompt='Summary')
-@click.option('--version', default='1')
-@click.option('--help-text', prompt='Help')
-@click.option('--architecture', default='x86_64')
-@click.option('--scope', default='public', type=click.Choice([
+@click.option('--license', '-l', default='UNKNOWN')
+@click.option('--summary', '-s', prompt='Summary')
+@click.option('--version', '-v', default='1')
+@click.option('--help-text', '-H', prompt='Help')
+@click.option('--architecture', '-a', default='x86_64')
+@click.option('--scope', '-S', default='public', type=click.Choice([
     'private', 'authoritative-source-only', 'restricted', 'public']))
-@click.option('--output', default='.')
+@click.option('--output', '-o', default='.')
 def generate_dockerfile(
         name, from_base, maintainer, license, summary, version,
         help_text, architecture, scope, output):
@@ -156,8 +156,8 @@ def generate_dockerfile(
 
 
 @click.command('build')
-@click.option('--path', default='.')
-@click.option('--tag', prompt='Container Tag')
+@click.option('--path', '-p', default='.')
+@click.argument('tag', required=True)
 def build(path, tag):
     _popd = _pushd(path)
     try:
@@ -170,7 +170,7 @@ def build(path, tag):
 
 
 @click.command('tar')
-@click.option('--image', prompt='Image')
+@click.argument('image', required=True)
 def docker_image_to_tar(image):
     try:
         subprocess.check_call([

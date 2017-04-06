@@ -26,50 +26,19 @@ import tempfile
 import click
 import jinja2
 
+from syscontainer_build import util
+
 
 MANIFEST_JSON_STRUCT = {
     "version": "1.0",
     "defaultValues": {},
 }
 
-SERVICE_TEMPLATE = """\
-[Unit]
-Description={}
 
-[Service]
-ExecStart=$EXEC_START
-ExecStop=$EXEC_STOP
-Restart=on-failure
-WorkingDirectory=$DESTDIR
-
-[Install]
-WantedBy=multi-user.target"""
-
-
-def _expand_path(path):
-    return os.path.realpath(os.path.expanduser(path))
-
-
-def _mkdir(path):
-    """
-    Shortcut for making directories.
-    """
-    path = _expand_path(path)
-    try:
-        os.mkdir(path)
-    except FileExistsError:
-        pass
-
-    return path
-
-
-def _pushd(dir):
-    original_cwd = os.getcwd()
-    os.chdir(dir)
-    return lambda: os.chdir(original_cwd)
-
-
-@click.command('generate-files', short_help='Generate system container files')
+@click.command(
+    'generate-files',
+    short_help='Generate system container files',
+    help='Generates manifest.json, config.template, and service.template.')
 @click.option('--output', '-o', prompt='Directory to write in', default='.')
 @click.option('--description', '-d', prompt='Description of container')
 @click.option(
@@ -81,8 +50,18 @@ def generate_files(output, description, config, default):
     """
     Generates manifest.json, config.template, and service.template
     for a system container.
+
+    :param output: Directory to write in.
+    :type output: str
+    :param description: Description of the container.
+    :type description: str
+    :param config: Options to pass to ocitools generate.
+    :type config: str
+    :param default: Defaults for the manifest.
+    :type default: dict
+    :raises: click.exceptions.ClickException
     """
-    output = _mkdir(output)
+    output = util.mkdir(output)
     manifest_struct = MANIFEST_JSON_STRUCT.copy()
     for item in default:
         try:
@@ -91,10 +70,12 @@ def generate_files(output, description, config, default):
         except ValueError as error:
             click.echo('{} not in a=b format. Skipping...'.format(item))
 
+    # Generate the manifest.json
     manifest_out = os.path.sep.join([output, 'manifest.json'])
     with open(manifest_out, 'w') as manifest:
         json.dump(manifest_struct, manifest, indent='    ')
 
+    # Generate the service.template
     service_out = os.path.sep.join([output, 'service.template'])
     with open(service_out, 'w') as service:
         loader = jinja2.PackageLoader('syscontainer_build')
@@ -103,8 +84,9 @@ def generate_files(output, description, config, default):
                 description=description)
         service.write(rendered)
 
+    # Generate config.json using ocitools
     temp_dir = tempfile.mkdtemp()
-    _popd = _pushd(temp_dir)
+    popd = util.pushd(temp_dir)
     try:
         ocitools_cmd = ['ocitools', 'generate']
         for item in config.split(' '):
@@ -120,11 +102,14 @@ def generate_files(output, description, config, default):
         raise click.exceptions.ClickException(
             'ocitools generate failed: {}'.format(error))
     finally:
-        _popd()
+        popd()
         shutil.rmtree(temp_dir)
 
 
-@click.command('generate-dockerfile', short_help='Generate a new Dockerfile')
+@click.command(
+    'generate-dockerfile',
+    short_help='Generate a new Dockerfile',
+    help='Generates a Dockerfile for use when creating a system container.')
 @click.argument('name', required=True)
 @click.option('--from-base', '-f', default='centos:latest')
 @click.option('--maintainer', '-m', default='{}@{}'.format(
@@ -138,38 +123,82 @@ def generate_files(output, description, config, default):
     'private', 'authoritative-source-only', 'restricted', 'public']))
 @click.option('--output', '-o', default='.')
 def generate_dockerfile(
-        name, from_base, maintainer, license, summary, version,
+        name, from_base, maintainer, license_name, summary, version,
         help_text, architecture, scope, output):
     """
     Generates a Dockerfile for use when creating a system container.
+
+    :param name: Name of the image.
+    :type name: str
+    :param from_base: The image to use as a base.
+    :type from_base: str
+    :param maintainer: The maintainer of the image.
+    :type maintainer: str
+    :param license_name: The license of the image.
+    :type license_name: str
+    :param summary: Description of the image.
+    :type summary: str
+    :param version: Version of the Dockerfile.
+    :type version: str
+    :param help_text: Help information for the image.
+    :type help_text: str
+    :param architecture: Image architecture.
+    :type architecture: str
+    :param scope: Scope of the image.
+    :type architecture: str
+    :param output: Directory to write in.
+    :type output: str
+    :raises: click.exceptions.ClickException
     """
-    output = _mkdir(output)
+    output = util.mkdir(output)
     with open(os.path.sep.join([output, 'Dockerfile']), 'w') as dockerfile:
         loader = jinja2.PackageLoader('syscontainer_build')
         rendered = loader.load(jinja2.Environment(), 'Dockerfile.j2').render(
             from_base=from_base, name=name, maintainer=maintainer,
-            license=license, summary=summary, version=version,
+            license_name=license_name, summary=summary, version=version,
             help_text=help_text, architecture=architecture, scope=scope)
         dockerfile.write(rendered)
 
 
-@click.command('build', short_help='Build a new image')
+@click.command(
+    'build',
+    short_help='Build a new image',
+    help='Builds a new system container image.')
 @click.option('--path', '-p', default='.')
 @click.argument('tag', required=True)
 def build(path, tag):
-    _popd = _pushd(path)
+    """
+    Builds a new system container image.
+
+    :param path: Path to the directory containing the Dockerfile.
+    :type path: str
+    :param tag: The tag to use for the new image.
+    :type tag: str
+    :raises: click.exceptions.ClickException
+    """
+    popd = util.pushd(path)
     try:
         subprocess.check_call(['docker', 'build', '-t', tag, '.'])
     except subprocess.CalledProcessError as error:
         raise click.exceptions.ClickException(
             'Can not build image: {}'.format(error))
     finally:
-        _popd()
+        popd()
 
 
-@click.command('tar', short_help='Export image to a tar file')
+@click.command(
+    'tar',
+    short_help='Export image to a tar file',
+    help='Exports an image as a tar file.')
 @click.argument('image', required=True)
 def docker_image_to_tar(image):
+    """
+    Exports an image as a tar file.
+
+    :param image: The name of the image.
+    :type image: str
+    :raises: click.exceptions.ClickException
+    """
     try:
         subprocess.check_call([
             'docker', 'save', '-o', '{}.tar'.format(image), image])

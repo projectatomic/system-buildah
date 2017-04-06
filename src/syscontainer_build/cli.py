@@ -17,12 +17,14 @@
 System Container build tool.
 """
 
-import click
 import json
 import os
 import shutil
 import subprocess
 import tempfile
+
+import click
+import jinja2
 
 
 MANIFEST_JSON_STRUCT = {
@@ -42,27 +44,6 @@ WorkingDirectory=$DESTDIR
 
 [Install]
 WantedBy=multi-user.target"""
-
-
-DOCKERFILE_TEMPLATE = """\
-FROM {}
-
-# Fill out the labels
-LABEL name="{}" \\
-      maintainer="{}" \\
-      license="{}" \\
-      summary="{}" \\
-      version="{}" \\
-      help="{}" \\
-      architecture="{}" \\
-      atomic.type="system" \\
-      distribution-scope="public"
-
-
-COPY manifest.json service.template config.json.template /exports/
-
-# RUN YOUR COMMAND HERE
-"""
 
 
 def _expand_path(path):
@@ -113,7 +94,11 @@ def generate_files(output, description, default):
 
     service_out = os.path.sep.join([output, 'service.template'])
     with open(service_out, 'w') as service:
-        service.write(SERVICE_TEMPLATE.format(description))
+        loader = jinja2.PackageLoader('syscontainer_build')
+        rendered = loader.load(
+            jinja2.Environment(), 'service.template.j2').render(
+                description=description)
+        service.write(rendered)
 
     temp_dir = tempfile.mkdtemp()
     _popd = _pushd(temp_dir)
@@ -150,9 +135,12 @@ def generate_dockerfile(
     """
     output = _mkdir(output)
     with open(os.path.sep.join([output, 'Dockerfile']), 'w') as dockerfile:
-        dockerfile.write(DOCKERFILE_TEMPLATE.format(
-            from_base, name, maintainer, license,
-            summary, version, help_text, architecture))
+        loader = jinja2.PackageLoader('syscontainer_build')
+        rendered = loader.load(jinja2.Environment(), 'Dockerfile.j2').render(
+            from_base=from_base, name=name, maintainer=maintainer,
+            license=license, summary=summary, version=version,
+            help_text=help_text, architecture=architecture, scope=scope)
+        dockerfile.write(rendered)
 
 
 @click.command('build')

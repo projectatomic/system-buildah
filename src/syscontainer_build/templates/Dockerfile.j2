@@ -1,0 +1,17 @@
+FROM {{ from_base }}
+
+# Fill out the labels
+LABEL name="{{ name }}" \
+      maintainer="{{ maintainer }}" \
+      license="{{ license }}" \
+      summary="{{ summary }}" \
+      version="{{ version }}" \
+      help="{{ help_text }}" \
+      architecture="{{ architecture }}" \
+      atomic.type="system" \
+      distribution-scope="{{ scope }}"
+
+
+COPY manifest.json service.template config.json.template /exports/
+
+# RUN YOUR COMMAND HERE

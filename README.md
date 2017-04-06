@@ -1,12 +1,15 @@
 # syscontainer-build
 Simple toolbox for building system containers.
 
+[![Build Status](https://travis-ci.org/ashcrow/syscontainer-build.svg)](https://travis-ci.org/ashcrow/syscontainer-build)
+
 **Note**: This is a POC
 
 ## Requires
 
 * python3
 * click (python library)
+* jinja2 (python library)
 
 ## Example
 

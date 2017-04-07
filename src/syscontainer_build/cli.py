@@ -79,7 +79,7 @@ class GenerateFilesAction(argparse.Action):
         temp_dir = tempfile.mkdtemp()
         popd = util.pushd(temp_dir)
         try:
-            ocitools_cmd = ['ocitools', 'generate']
+            ocitools_cmd = ['ocitools', 'generate', "--read-only"]
             for item in namespace.config.split(' '):
                 try:
                     ocitools_cmd = ocitools_cmd + item.split('=')

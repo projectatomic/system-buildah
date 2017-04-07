@@ -88,7 +88,14 @@ class GenerateFilesAction(argparse.Action):
                         '{} not in a=b format. Skipping...'.format(item))
             subprocess.check_call(ocitools_cmd)
             config_out = os.path.sep.join([output, 'config.json.template'])
-            shutil.move('config.json', config_out)
+            try:
+                with open('config.json', 'r') as config_file:
+                    configuration = json.load(config_file)
+                    configuration['process']['terminal'] = False
+                with open(config_out, 'w') as dest:
+                    json.dump(configuration, dest, indent=8, sort_keys=True)
+            finally:
+                os.unlink('config.json')
         finally:
             popd()
             shutil.rmtree(temp_dir)

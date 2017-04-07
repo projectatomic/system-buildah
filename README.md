@@ -20,7 +20,7 @@ Simple toolbox for building system containers.
 ## Example
 
 ```shell
-# Generte system container files
+# Generate system container files
 $ syscontainer-build generate-files \
     --default=variable=value -D=another=anothervalue \
     --config="--hostname=confighost --cwd=/root" \

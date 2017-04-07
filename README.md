@@ -8,7 +8,14 @@ Simple toolbox for building system containers.
 ## Requires
 
 * python3
+* docker binary and service
+* ocitools binary
 * jinja2 (python library)
+
+## Install
+
+1. Clone the repo
+2. ```python setup.py install --user```
 
 ## Example
 

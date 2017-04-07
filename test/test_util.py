@@ -17,7 +17,10 @@ Tests for the util module.
 """
 
 import os
-import shutil
+import sys
+
+# Ensure the package is in the path
+sys.path.insert(1, os.path.realpath('./src/'))
 
 from syscontainer_build import util
 
@@ -30,23 +33,19 @@ def test__expand_path():
     assert home_path[0] == '/'
 
 
-def test_mkdir():
+def test_mkdir(tmpdir):
     """Verify mkdir creates directories"""
-    dir = '/tmp/syscontainerbuildtest'
-    try:
-        assert util.mkdir(dir) == dir  # New directory
-        assert util.mkdir(dir) == dir  # Already exists
-    finally:
-        # Clean up
-        shutil.rmtree(dir)
+    path = tmpdir.mkdir('mkdir').dirname
+    assert util.mkdir(path) == path  # New directory
+    assert util.mkdir(path) == path  # Already exists
 
 
-def test_pushd():
+def test_pushd(tmpdir):
     """Verify pushd acts like pushd in the shell"""
     original_cwd = os.getcwd()
-    dir = '/tmp'
-    popd = util.pushd(dir)
+    path = tmpdir.mkdir('pushd').dirname
+    popd = util.pushd(path)
     assert callable(popd)  # We must get a callable
-    assert os.getcwd() == dir  # We should have moved to dir
+    assert os.getcwd() == path  # We should have moved to dir
     popd()
     assert os.getcwd() == original_cwd  # Now back to the original

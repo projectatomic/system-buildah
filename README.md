@@ -8,21 +8,24 @@ Simple toolbox for building system containers.
 ## Requires
 
 * python3
-* click (python library)
 * jinja2 (python library)
 
 ## Example
 
 ```shell
+# Generte system container files
 $ syscontainer-build generate-files \
     --default=variable=value -D=another=anothervalue \
     --config="--hostname=confighost --cwd=/root" \
-    --output new_container_image
-$ syscontainer-build generate-dockerfile --from-base fedora:latest --output new_container_image
-Summary: This is my image
-Help: Help text would go here
-$ syscontainer-build build --path new_container_image my_system_container_image
+    new_container_image
+# Generate a system container Dockerfile
+$ syscontainer-build generate-dockerfile \
+    --from-base fedora:latest \
+    --output new_container_image name_of_image
+# Build a system container image
+$ syscontainer-build build \
+    --path new_container_image my_system_container_image
 [...]
-# Export as a tar
+# Export the image as a tar
 $ syscontainer-build tar my_system_container_image
 ```

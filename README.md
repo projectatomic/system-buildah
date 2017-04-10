@@ -17,6 +17,14 @@ Simple toolbox for building system containers.
 1. Clone the repo
 2. ```python setup.py install --user```
 
+### Install via RPM
+
+1. Download the source
+2. Extract the source to the local directory
+3. Move the tarball to your ``rpmbuild/SOURCES/`` directory
+4. ```rpmbuild -ba contrib/rpm/syscontainer-build.spec```
+5. ```rpm -ivh $PATH_OF_THE_BUILT_RPM```
+
 ## Example
 
 ```shell

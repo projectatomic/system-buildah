@@ -32,7 +32,7 @@ test_require = extract_requirements('test-requirements.txt')
 
 setup(
     name='syscontainer-build',
-    version='0.0.2',
+    version='0.0.3',
     description='Simple System Container build toolbox',
     author='Steve Milner',
     url='https://github.com/ashcrow/syscontainer-build',

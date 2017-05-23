@@ -37,7 +37,7 @@ def test_TarAction(monkeypatch):
     cli.TarAction('', '').__call__('', argparse.Namespace(), image)
 
 
-def test_TarAction(monkeypatch):
+def test_BuildAction(monkeypatch):
     """Verify BuildAction runs the proper command"""
     tag = 'a'
     def assert_call(args):
@@ -45,3 +45,34 @@ def test_TarAction(monkeypatch):
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
     cli.BuildAction('', '').__call__('', argparse.Namespace(path='.'), tag, '')
+
+
+def test_GenerateDockerfileAction(tmpdir):
+    """Verify GenerateDockerfile writes the expected file"""
+    tmp = tmpdir.dirname
+    file_path = os.path.sep.join([tmp, 'Dockerfile'])
+    input = argparse.Namespace(
+        output=tmp,
+        from_base='from_base',
+        maintainer='maintainer', license='license',
+        summary='summary', version='version', help_text='help_text',
+        architecture='architecture', scope='scope')
+    cli.GenerateDockerfileAction('', '').__call__('', input, 'name', '')
+    # Verify the file exists
+    assert os.path.isfile(file_path)
+
+    # Make sure we have expected items in the file
+    with open(file_path, 'r') as _file:
+        data = _file.read()
+        for k, v in input.__dict__.items():
+            # Rename help_text to help
+            if k == 'help_text':
+                k = 'help'
+            # from_base is for the FROM
+            elif k == 'from_base':
+                assert 'FROM {}'.format(v) in data
+                continue
+            # output isn't used inside the file so continue
+            elif k == 'output':
+                continue
+            assert '{}="{}"'.format(k, v) in data

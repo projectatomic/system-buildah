@@ -10,8 +10,12 @@ LABEL name="{{ name }}" \
       architecture="{{ architecture }}" \
       atomic.type="system" \
       distribution-scope="{{ scope }}"
-
-
+{% for hostfs_dir in hostfs_dirs -%}
+RUN mkdir -p /export/hostfs{{ hostfs_dir }}
+{% endfor -%}
+{% for local, remote in add_files.items() -%}
+COPY {{ local }} /export/hostfs{{ remote }}
+{% endfor -%}
 COPY manifest.json service.template config.json.template /exports/
 
 # RUN YOUR COMMAND HERE

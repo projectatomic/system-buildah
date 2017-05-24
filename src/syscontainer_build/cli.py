@@ -119,6 +119,13 @@ class GenerateDockerfileAction(argparse.Action):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
+        hostfs_dirs = []
+        add_files = {}
+        for item in namespace.add_file:
+            local, host = item.split('=')
+            hostfs_dirs.append(os.path.dirname(host))
+            add_files[local] = host
+
         output = util.mkdir(namespace.output)
         with open(os.path.sep.join([output, 'Dockerfile']), 'w') as dockerfile:
             loader = jinja2.PackageLoader('syscontainer_build')
@@ -126,9 +133,10 @@ class GenerateDockerfileAction(argparse.Action):
                 jinja2.Environment(), 'Dockerfile.j2').render(
                     from_base=namespace.from_base, name=values,
                     maintainer=namespace.maintainer,
-                license_name=namespace.license, summary=namespace.summary,
-                version=namespace.version, help_text=namespace.help_text,
-                architecture=namespace.architecture, scope=namespace.scope)
+                    license_name=namespace.license, summary=namespace.summary,
+                    version=namespace.version, help_text=namespace.help_text,
+                    architecture=namespace.architecture, scope=namespace.scope,
+                    add_files=add_files, hostfs_dirs=set(hostfs_dirs))
             dockerfile.write(rendered)
 
 
@@ -238,6 +246,12 @@ def main():
         '-s', '--scope', default='private', help='Scope of the image',
         choices=[
             'private', 'authoritative-source-only', 'restricted', 'public'])
+    dockerfile_command.add_argument(
+        '-A', '--add-file',
+        action='append',
+        default=[],
+        help=('Add a file to the host on install. '
+              'file=/full/host/path EX: file.txt=/etc/file.txt'))
     dockerfile_command.add_argument(
         'name',
         help='Name for the new system container image',

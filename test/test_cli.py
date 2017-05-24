@@ -56,7 +56,7 @@ def test_GenerateDockerfileAction(tmpdir):
         from_base='from_base',
         maintainer='maintainer', license='license',
         summary='summary', version='version', help_text='help_text',
-        architecture='architecture', scope='scope')
+        architecture='architecture', scope='scope', add_file=[])
     cli.GenerateDockerfileAction('', '').__call__('', input, 'name', '')
     # Verify the file exists
     assert os.path.isfile(file_path)
@@ -73,6 +73,6 @@ def test_GenerateDockerfileAction(tmpdir):
                 assert 'FROM {}'.format(v) in data
                 continue
             # output isn't used inside the file so continue
-            elif k == 'output':
+            elif k in ['output', 'add_file']:
                 continue
             assert '{}="{}"'.format(k, v) in data

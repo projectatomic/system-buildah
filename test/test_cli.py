@@ -24,7 +24,7 @@ import sys
 # Ensure the package is in the path
 sys.path.insert(1, os.path.realpath('./src/'))
 
-from syscontainer_build import cli
+from system_buildah import cli
 
 
 def test_TarAction(monkeypatch):

@@ -1,11 +1,11 @@
-Name:           syscontainer-build
+Name:           system-buildah
 Version:        0.0.4
 Release:        1%{?dist}
 Summary:        Simple toolbox for building system containers
 
 License:        GPLv3+
-URL:            https://github.com/ashcrow/syscontainer-build/
-Source0:        https://github.com/ashcrow/syscontainer-build/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+URL:            https://github.com/ashcrow/system-buildah/
+Source0:        https://github.com/ashcrow/system-buildah/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel, python3-setuptools
@@ -27,7 +27,7 @@ Simple toolbox for building system containers.
 rm -rf $RPM_BUILD_ROOT
 %{__python3} setup.py install -O1 --skip-build --root $RPM_BUILD_ROOT
 # Force python3
-sed -i 's|/usr/bin/env python|/usr/bin/python3|' $RPM_BUILD_ROOT%{python3_sitelib}/syscontainer_build/cli.py
+sed -i 's|/usr/bin/env python|/usr/bin/python3|' $RPM_BUILD_ROOT%{python3_sitelib}/system_buildah/cli.py
 
 
 %files

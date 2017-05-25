@@ -25,7 +25,7 @@ import tempfile
 
 import jinja2
 
-from syscontainer_build import util
+from system_buildah import util
 
 
 class GenerateFilesAction(argparse.Action):
@@ -68,7 +68,7 @@ class GenerateFilesAction(argparse.Action):
         # Generate the service.template
         service_out = os.path.sep.join([output, 'service.template'])
         with open(service_out, 'w') as service:
-            loader = jinja2.PackageLoader('syscontainer_build')
+            loader = jinja2.PackageLoader('system_buildah')
             rendered = loader.load(
                 jinja2.Environment(), 'service.template.j2').render(
                     description=namespace.description)
@@ -128,7 +128,7 @@ class GenerateDockerfileAction(argparse.Action):
 
         output = util.mkdir(namespace.output)
         with open(os.path.sep.join([output, 'Dockerfile']), 'w') as dockerfile:
-            loader = jinja2.PackageLoader('syscontainer_build')
+            loader = jinja2.PackageLoader('system_buildah')
             rendered = loader.load(
                 jinja2.Environment(), 'Dockerfile.j2').render(
                     from_base=namespace.from_base, name=values,

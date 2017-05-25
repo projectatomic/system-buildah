@@ -22,7 +22,7 @@ import sys
 # Ensure the package is in the path
 sys.path.insert(1, os.path.realpath('./src/'))
 
-from syscontainer_build import util
+from system_buildah import util
 
 
 def test__expand_path():

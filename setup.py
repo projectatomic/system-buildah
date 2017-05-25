@@ -31,11 +31,11 @@ test_require = extract_requirements('test-requirements.txt')
 
 
 setup(
-    name='syscontainer-build',
+    name='system-buildah',
     version='0.0.4',
     description='Simple System Container build toolbox',
     author='Steve Milner',
-    url='https://github.com/ashcrow/syscontainer-build',
+    url='https://github.com/ashcrow/system-buildah',
     license="GPLv3+",
 
     install_requires=install_requires,
@@ -47,7 +47,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'syscontainer-build = syscontainer_build.cli:main',
+            'system-buildah = system_buildah.cli:main',
         ],
     }
 )

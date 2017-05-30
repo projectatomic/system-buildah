@@ -1,11 +1,11 @@
 # system-buildah
-Simple toolbox for building system containers.
+Simple toolbox for building system images.
 
 [![Build Status](https://travis-ci.org/ashcrow/system-buildah.svg)](https://travis-ci.org/ashcrow/system-buildah)
 
-**Note**: This is a POC
-
 ## Requires
+
+The list of requirements are limited to keep portability between OS variations as simple as possible.
 
 * python3
 * docker binary and service
@@ -14,6 +14,7 @@ Simple toolbox for building system containers.
 
 ## Install
 
+### For Your User
 1. Clone the repo
 2. ```python setup.py install --user```
 

@@ -30,8 +30,9 @@ from system_buildah import cli
 def test_TarAction(monkeypatch):
     """Verify TarAction runs the proper command"""
     image = 'a:a'
+    tar = 'a-a.tar'
     def assert_call(args):
-        assert args == ['docker', 'save', '-o', '{}.tar'.format(image), image]
+        assert args == ['docker', 'save', '-o', tar, image]
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
     cli.TarAction('', '').__call__('', argparse.Namespace(), image)

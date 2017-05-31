@@ -32,7 +32,7 @@ test_require = extract_requirements('test-requirements.txt')
 
 setup(
     name='system-buildah',
-    version='0.0.4',
+    version='0.0.5',
     description='Simple System Container build toolbox',
     author='Steve Milner',
     url='https://github.com/ashcrow/system-buildah',

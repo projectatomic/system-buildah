@@ -187,8 +187,9 @@ class TarAction(argparse.Action):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
+        tar = '{}.tar'.format(values.replace(':', '-'))
         subprocess.check_call([
-            'docker', 'save', '-o', '{}.tar'.format(values), values])
+            'docker', 'save', '-o', tar, values])
 
 
 def main():  # pragma: no cover

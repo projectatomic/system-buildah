@@ -1,5 +1,5 @@
 Name:           system-buildah
-Version:        0.0.4
+Version:        0.0.5
 Release:        1%{?dist}
 Summary:        Simple toolbox for building system containers
 
@@ -38,6 +38,10 @@ sed -i 's|/usr/bin/env python|/usr/bin/python3|' $RPM_BUILD_ROOT%{python3_siteli
 
 
 %changelog
+* Wed May 31 2017 Steve Milner <smilner@redhat.com> - 0.0.5-1
+- Additional tests
+- tar now outputs to $NAME-$LABEL.tar
+
 * Wed May 24 2017 Steve Milner <smilner@redhat.com> - 0.0.4-1
 - Update for release.
 * Mon Apr 10 2017 Steve Milner <smilner@redhat.com> - 0.0.3-1

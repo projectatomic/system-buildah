@@ -191,7 +191,7 @@ class TarAction(argparse.Action):
             'docker', 'save', '-o', '{}.tar'.format(values), values])
 
 
-def main():
+def main():  # pragma: no cover
     """
     Main entry point.
     """

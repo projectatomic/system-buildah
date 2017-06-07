@@ -44,8 +44,6 @@ def test_pushd(tmpdir):
     """Verify pushd acts like pushd in the shell"""
     original_cwd = os.getcwd()
     path = tmpdir.mkdir('pushd').dirname
-    popd = util.pushd(path)
-    assert callable(popd)  # We must get a callable
-    assert os.getcwd() == path  # We should have moved to dir
-    popd()
+    with util.pushd(path):
+        assert os.getcwd() == path  # We should have moved to dir
     assert os.getcwd() == original_cwd  # Now back to the original

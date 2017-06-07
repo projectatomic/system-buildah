@@ -76,28 +76,28 @@ class GenerateFilesAction(argparse.Action):
 
         # Generate config.json using ocitools
         temp_dir = tempfile.mkdtemp()
-        popd = util.pushd(temp_dir)
-        try:
-            ocitools_cmd = ['ocitools', 'generate', "--read-only"]
-            for item in namespace.config.split(' '):
-                try:
-                    ocitools_cmd = ocitools_cmd + item.split('=')
-                except ValueError as error:
-                    parser._print_message(
-                        '{} not in a=b format. Skipping...'.format(item))
-            subprocess.check_call(ocitools_cmd)
-            config_out = os.path.sep.join([output, 'config.json.template'])
+        with util.pushd(temp_dir):
             try:
-                with open('config.json', 'r') as config_file:
-                    configuration = json.load(config_file)
-                    configuration['process']['terminal'] = False
-                with open(config_out, 'w') as dest:
-                    json.dump(configuration, dest, indent=8, sort_keys=True)
+                ocitools_cmd = ['ocitools', 'generate', "--read-only"]
+                for item in namespace.config.split(' '):
+                    try:
+                        ocitools_cmd = ocitools_cmd + item.split('=')
+                    except ValueError as error:
+                        parser._print_message(
+                            '{} not in a=b format. Skipping...'.format(item))
+                subprocess.check_call(ocitools_cmd)
+                config_out = os.path.sep.join([output, 'config.json.template'])
+                try:
+                    with open('config.json', 'r') as config_file:
+                        configuration = json.load(config_file)
+                        configuration['process']['terminal'] = False
+                    with open(config_out, 'w') as dest:
+                        json.dump(
+                            configuration, dest, indent=8, sort_keys=True)
+                finally:
+                    os.unlink('config.json')
             finally:
-                os.unlink('config.json')
-        finally:
-            popd()
-            shutil.rmtree(temp_dir)
+                shutil.rmtree(temp_dir)
 
 
 class GenerateDockerfileAction(argparse.Action):
@@ -161,11 +161,8 @@ class BuildAction(argparse.Action):
         """
         path = namespace.path
         tag = values
-        popd = util.pushd(path)
-        try:
+        with util.pushd(path):
             subprocess.check_call(['docker', 'build', '-t', tag, '.'])
-        finally:
-            popd()
 
 
 class TarAction(argparse.Action):

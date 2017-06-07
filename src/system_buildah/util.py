@@ -18,6 +18,8 @@ Utility functions.
 
 import os
 
+from contextlib import contextmanager
+
 
 def _expand_path(path):
     """
@@ -49,16 +51,15 @@ def mkdir(path):
     return path
 
 
+@contextmanager
 def pushd(path):
     """
-    Changes to a path returning a function which, when executed,
-    will change back to the original path.
+    Changes to a path until end of context.
 
     :param path: A file system path.
     :type path: str
-    :returns: A function which returns to the original path.
-    :rtype: callable
     """
     original_cwd = os.getcwd()
     os.chdir(path)
-    return lambda: os.chdir(original_cwd)
+    yield
+    os.chdir(original_cwd)

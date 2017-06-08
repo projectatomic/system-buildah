@@ -1,5 +1,5 @@
 # system-buildah
-Simple toolbox for building system images.
+Simple toolbox for building system images. Read more on the [Project Atomic Blog](http://www.projectatomic.io/blog/2017/06/creating-system-containers/).
 
 [![Build Status](https://travis-ci.org/ashcrow/system-buildah.svg)](https://travis-ci.org/ashcrow/system-buildah)
 

@@ -161,8 +161,14 @@ class BuildAction(argparse.Action):
         """
         path = namespace.path
         tag = values
+        command = ['docker', 'build', '-t', tag, '.']
+
+        if namespace.host:
+            command.insert(1, '--host={}'.format(namespace.host))
+        if namespace.tlsverify:
+            command.insert(1, '--tlsverify')
         with util.pushd(path):
-            subprocess.check_call(['docker', 'build', '-t', tag, '.'])
+            subprocess.check_call(command)
 
 
 class TarAction(argparse.Action):
@@ -185,8 +191,13 @@ class TarAction(argparse.Action):
         :raises: subprocess.CalledProcessError
         """
         tar = '{}.tar'.format(values.replace(':', '-'))
-        subprocess.check_call([
-            'docker', 'save', '-o', tar, values])
+        command = ['docker', 'save', '-o', tar, values]
+        if namespace.host:
+            command.insert(1, '--host={}'.format(namespace.host))
+        if namespace.tlsverify:
+            command.insert(1, '--tlsverify')
+
+        subprocess.check_call(command)
 
 
 def main():  # pragma: no cover
@@ -259,6 +270,10 @@ def main():  # pragma: no cover
     build_command = subparsers.add_parser(
         'build', help='Builds a new system container image')
     build_command.add_argument(
+        '-H', '--host', help='Remote Docker host to connect to')
+    build_command.add_argument(
+        '--tlsverify', action="store_true", help='Enable TLS Verification')
+    build_command.add_argument(
         '-p', '--path', default='.', help='Path to the Dockerfile directory')
     build_command.add_argument(
         'tag', help='Tag for the new image', action=BuildAction)
@@ -268,6 +283,10 @@ def main():  # pragma: no cover
         'tar', help='Exports an image as a tar file')
     tar_command.add_argument(
         'image', help='Name of the image', action=TarAction)
+    tar_command.add_argument(
+        '-H', '--host', help='Remote Docker host to connect to')
+    tar_command.add_argument(
+        '--tlsverify', action="store_true", help='Enable TLS Verification')
 
     try:
         parser.parse_args()

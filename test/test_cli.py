@@ -27,6 +27,22 @@ sys.path.insert(1, os.path.realpath('./src/'))
 from system_buildah import cli
 
 
+def test_GenerateFilesAction_create_manifest(monkeypatch):
+    """Verify GenerateFiles_create_manifest returns proper data"""
+    ns = argparse.Namespace(default=['a=a', 'b=c', 'skipped'])
+    parser = argparse.ArgumentParser()
+
+    def assert_call(arg):
+        assert 'skipped' in arg
+
+    monkeypatch.setattr(parser, '_print_message', assert_call)
+
+    result = cli.GenerateFilesAction('', '')._create_manifest(ns, parser)
+    assert result['defaultValues'].get('a') == 'a'
+    assert result['defaultValues'].get('b') == 'c'
+    assert 'skipped' not in result['defaultValues']
+
+
 def test_TarAction(monkeypatch):
     """Verify TarAction runs the proper command"""
     image = 'a:a'

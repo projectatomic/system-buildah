@@ -33,6 +33,31 @@ class GenerateFilesAction(argparse.Action):
     Creates new system container files.
     """
 
+    def _create_manifest(self, namespace, parser):
+        """
+        Creates the manifest structure based on input.
+
+        :name parser: The argument parser in use.
+        :type parser: argparse.ArgumentParser
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        :returns: manifest structure
+        :rtype: dict
+        """
+        manifest = {
+            "version": "1.0",
+            "defaultValues": {},
+        }
+
+        for item in namespace.default:
+            try:
+                k, v = item.split('=')
+                manifest['defaultValues'][k] = v
+            except ValueError as error:
+                parser._print_message(
+                    '{} not in a=b format. Skipping...'.format(item))
+        return manifest
+
     def __call__(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
@@ -48,17 +73,7 @@ class GenerateFilesAction(argparse.Action):
         :raises: subprocess.CalledProcessError
         """
         output = util.mkdir(values)
-        manifest_struct = {
-            "version": "1.0",
-            "defaultValues": {},
-        }
-        for item in namespace.default:
-            try:
-                k, v = item.split('=')
-                manifest_struct['defaultValues'][k] = v
-            except ValueError as error:
-                parser._print_message(
-                    '{} not in a=b format. Skipping...'.format(item))
+        manifest_struct = self._create_manifest(namespace, parser)
 
         # Generate the manifest.json
         manifest_out = os.path.sep.join([output, 'manifest.json'])

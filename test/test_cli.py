@@ -32,20 +32,28 @@ def test_TarAction(monkeypatch):
     image = 'a:a'
     tar = 'a-a.tar'
     def assert_call(args):
-        assert args == ['docker', '--tlsverify', '--host=example.org', 'save', '-o', tar, image]
+        assert args == [
+            'docker', '--tlsverify', '--host=example.org',
+            'save', '-o', tar, image]
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.TarAction('', '').__call__('', argparse.Namespace(host='example.org', tlsverify=True), image)
+    cli.TarAction('', '').__call__(
+        '', argparse.Namespace(
+            host='example.org', tlsverify=True), image)
 
 
 def test_BuildAction(monkeypatch):
     """Verify BuildAction runs the proper command"""
     tag = 'a'
     def assert_call(args):
-        assert args == ['docker', '--tlsverify', '--host=example.org', 'build', '-t', tag, '.']
+        assert args == [
+            'docker', '--tlsverify', '--host=example.org',
+            'build', '-t', tag, '.']
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.BuildAction('', '').__call__('', argparse.Namespace(path='.', host='example.org', tlsverify=True), tag, '')
+    cli.BuildAction('', '').__call__(
+        '', argparse.Namespace(
+            path='.', host='example.org', tlsverify=True), tag, '')
 
 
 def test_GenerateDockerfileAction(tmpdir):

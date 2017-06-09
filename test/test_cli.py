@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-Tests for the util module.
+Tests for the cli module.
 """
 
 import argparse
@@ -32,20 +32,20 @@ def test_TarAction(monkeypatch):
     image = 'a:a'
     tar = 'a-a.tar'
     def assert_call(args):
-        assert args == ['docker', 'save', '-o', tar, image]
+        assert args == ['docker', '--tlsverify', '--host=example.org', 'save', '-o', tar, image]
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.TarAction('', '').__call__('', argparse.Namespace(), image)
+    cli.TarAction('', '').__call__('', argparse.Namespace(host='example.org', tlsverify=True), image)
 
 
 def test_BuildAction(monkeypatch):
     """Verify BuildAction runs the proper command"""
     tag = 'a'
     def assert_call(args):
-        assert args == ['docker', 'build', '-t', tag, '.']
+        assert args == ['docker', '--tlsverify', '--host=example.org', 'build', '-t', tag, '.']
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.BuildAction('', '').__call__('', argparse.Namespace(path='.'), tag, '')
+    cli.BuildAction('', '').__call__('', argparse.Namespace(path='.', host='example.org', tlsverify=True), tag, '')
 
 
 def test_GenerateDockerfileAction(tmpdir):

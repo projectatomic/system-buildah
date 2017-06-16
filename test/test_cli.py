@@ -27,6 +27,15 @@ sys.path.insert(1, os.path.realpath('./src/'))
 from system_buildah import cli
 
 
+def test_GenerateFilesAction__render_service_template(monkeypatch):
+    """Verify GenerateFiles__render_service_template renders"""
+    ns = argparse.Namespace(description='testing')
+
+    result = cli.GenerateFilesAction('', '')._render_service_template(ns)
+    assert type(result) is str
+    assert '\nDescription=testing\n' in result
+
+
 def test_GenerateFilesAction_create_manifest(monkeypatch):
     """Verify GenerateFiles_create_manifest returns proper data"""
     ns = argparse.Namespace(default=['a=a', 'b=c', 'skipped'])

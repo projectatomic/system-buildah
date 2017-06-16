@@ -58,6 +58,20 @@ class GenerateFilesAction(argparse.Action):
                     '{} not in a=b format. Skipping...'.format(item))
         return manifest
 
+    def _render_service_template(self, namespace):
+        """
+        Renders and returns the service template.
+
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        :returns: Rendered template
+        :rtype: str
+        """
+        loader = jinja2.PackageLoader('system_buildah')
+        return loader.load(
+            jinja2.Environment(), 'service.template.j2').render(
+                description=namespace.description)
+
     def __call__(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
@@ -81,12 +95,9 @@ class GenerateFilesAction(argparse.Action):
             json.dump(manifest_struct, manifest, indent='    ')
 
         # Generate the service.template
+        rendered = self._render_service_template(namespace)
         service_out = os.path.sep.join([output, 'service.template'])
         with open(service_out, 'w') as service:
-            loader = jinja2.PackageLoader('system_buildah')
-            rendered = loader.load(
-                jinja2.Environment(), 'service.template.j2').render(
-                    description=namespace.description)
             service.write(rendered)
 
         # Generate config.json using ocitools

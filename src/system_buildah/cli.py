@@ -72,6 +72,28 @@ class GenerateFilesAction(argparse.Action):
             jinja2.Environment(), 'service.template.j2').render(
                 description=namespace.description)
 
+    def _generate_ocitools_command(self, namespace, parser):
+        """
+        Generates and returns the ocitools command for execution.
+
+        :name parser: The argument parser in use.
+        :type parser: argparse.ArgumentParser
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        :returns: The ocitools command to execute
+        :rtype: list
+        """
+        ocitools_cmd = ['ocitools', 'generate', "--read-only"]
+        if namespace.config:
+            for item in namespace.config.split(' '):
+                try:
+                    item.index('=')
+                    ocitools_cmd = ocitools_cmd + item.split('=')
+                except ValueError as error:
+                    parser._print_message(
+                        '{} not in a=b format. Skipping...'.format(item))
+        return ocitools_cmd
+
     def __call__(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
@@ -102,15 +124,9 @@ class GenerateFilesAction(argparse.Action):
 
         # Generate config.json using ocitools
         temp_dir = tempfile.mkdtemp()
+        ocitools_cmd = self._generate_ocitools_command(namespace, parser)
         with util.pushd(temp_dir):
             try:
-                ocitools_cmd = ['ocitools', 'generate', "--read-only"]
-                for item in namespace.config.split(' '):
-                    try:
-                        ocitools_cmd = ocitools_cmd + item.split('=')
-                    except ValueError as error:
-                        parser._print_message(
-                            '{} not in a=b format. Skipping...'.format(item))
                 subprocess.check_call(ocitools_cmd)
                 config_out = os.path.sep.join([output, 'config.json.template'])
                 try:
@@ -242,7 +258,7 @@ def main():  # pragma: no cover
         '-d', '--description',
         default='UNKNOWN', help='Description of container')
     files_command.add_argument(
-        '-c', '--config', default='',
+        '-c', '--config', default=None,
         help=('Options to pass to ocitools generate. '
               'Example: -c "--cwd=/tmp --os=linux"'))
     files_command.add_argument(

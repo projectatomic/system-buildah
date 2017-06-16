@@ -52,6 +52,26 @@ def test_GenerateFilesAction_create_manifest(monkeypatch):
     assert 'skipped' not in result['defaultValues']
 
 
+def test_GenerateFilesAction__generate_ocitools_command(monkeypatch):
+    """
+    Verify GenerateFiles__generate_ocitools_command returns proper a command
+    """
+    ns = argparse.Namespace(config='--key=value --second=one ignore')
+    parser = argparse.ArgumentParser()
+
+    def assert_call(arg):
+        assert 'ignore' in arg
+        assert 'Skipping' in arg
+
+    monkeypatch.setattr(parser, '_print_message', assert_call)
+    cmd = [
+        'ocitools', 'generate', '--read-only',
+        '--key', 'value', '--second', 'one']
+
+    result = cli.GenerateFilesAction('', '')._generate_ocitools_command(ns, parser)
+    assert result == cmd
+
+
 def test_TarAction(monkeypatch):
     """Verify TarAction runs the proper command"""
     image = 'a:a'

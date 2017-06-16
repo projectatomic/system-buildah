@@ -114,7 +114,7 @@ class GenerateFilesAction(argparse.Action):
         # Generate the manifest.json
         manifest_out = os.path.sep.join([output, 'manifest.json'])
         with open(manifest_out, 'w') as manifest:
-            json.dump(manifest_struct, manifest, indent='    ')
+            json.dump(manifest_struct, manifest, indent=8)
 
         # Generate the service.template
         rendered = self._render_service_template(namespace)

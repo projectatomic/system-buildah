@@ -239,10 +239,14 @@ def main():  # pragma: no cover
         '--log-level',
         choices=('debug', 'info', 'warn', 'fatal'), default='info')
 
-    # Parse early so we can set the logger and return fast if --help is used
-    early_args = parser.parse_args()
-    logging.basicConfig(level=logging.getLevelName(
-        early_args.log_level.upper()))
+    # Parent parser to use with commands that may use moby/docker
+    extra_moby_switches = argparse.ArgumentParser(add_help=False)
+    extra_moby_switches.add_argument(
+        '-H', '--host',
+        help='Remote Docker host to connect to (Docker specific)')
+    extra_moby_switches.add_argument(
+        '--tlsverify', action="store_true",
+        help='Enable TLS Verification (Docker specific)')
 
     subparsers = parser.add_subparsers(
         title='commands', description='commands')
@@ -307,13 +311,8 @@ def main():  # pragma: no cover
 
     # build command
     build_command = subparsers.add_parser(
-        'build', help='Builds a new system container image')
-    build_command.add_argument(
-        '-H', '--host',
-        help='Remote Docker host to connect to (Docker specific)')
-    build_command.add_argument(
-        '--tlsverify', action="store_true",
-        help='Enable TLS Verification (Docker specific)')
+        'build', help='Builds a new system container image',
+        parents=[extra_moby_switches])
     build_command.add_argument(
         '-p', '--path', default='.', help='Path to the Dockerfile directory')
     build_command.add_argument(
@@ -321,17 +320,15 @@ def main():  # pragma: no cover
 
     # tar command
     tar_command = subparsers.add_parser(
-        'tar', help='Exports an image as a tar file')
+        'tar', help='Exports an image as a tar file',
+        parents=[extra_moby_switches])
     tar_command.add_argument(
         'image', help='Name of the image', action=TarAction)
-    tar_command.add_argument(
-        '-H', '--host',
-        help='Remote Docker host to connect to (Docker specific)')
-    tar_command.add_argument(
-        '--tlsverify', action="store_true",
-        help='Enable TLS Verification (Docker specific)')
 
     try:
+        early_args = parser.parse_args()
+        logging.basicConfig(level=logging.getLevelName(
+            early_args.log_level.upper()))
         logging.debug('Parsing arguments from the command line')
         parser.parse_args()
     except subprocess.CalledProcessError as error:

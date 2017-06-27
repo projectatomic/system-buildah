@@ -26,22 +26,34 @@ class Manager(managers.ImageManager):
     Works with moby/docker.
     """
 
-    def build(self, namespace, tag):
+    def _additional_switches(self, namespace, command):
         """
-        Builds a specific image.
+        Adds additional switches to the moby/docker command.
 
-        :param namespace: Namespace passed in via CLI.
-        :type namespace: argparse.Namespace
-        :param tag: The tag to use when building.
-        :type tag: str
-        :raises: subprocess.CalledProcessError
+        :param namespace: namespace passed in via cli.
+        :type namespace: argparse.namespace
+        :param command: Command to execute as a list
+        :type command: list(str, str,...)
         """
-        command = ['docker', 'build', '-t', tag, '.']
-
         if namespace.host:
             command.insert(1, '--host={}'.format(namespace.host))
         if namespace.tlsverify:
             command.insert(1, '--tlsverify')
+        return command
+
+    def build(self, namespace, tag):
+        """
+        Builds a specific image.
+
+        :param namespace: namespace passed in via cli.
+        :type namespace: argparse.namespace
+        :param tag: The tag to use when building.
+        :type tag: str
+        :raises: subprocess.CalledProcessError
+        """
+        command = self._additional_switches(
+            namespace,
+            ['docker', 'build', '-t', tag, '.'])
 
         with util.pushd(namespace.path):
             subprocess.check_call(command)
@@ -57,11 +69,9 @@ class Manager(managers.ImageManager):
         :raises: subprocess.CalledProcessError
         """
         tar = '{}.tar'.format(output.replace(':', '-').replace('/', '-'))
-        command = ['docker', 'save', '-o', tar, output]
 
-        if namespace.host:
-            command.insert(1, '--host={}'.format(namespace.host))
-        if namespace.tlsverify:
-            command.insert(1, '--tlsverify')
+        command = self._additional_switches(
+            namespace,
+            ['docker', 'save', '-o', tar, output])
 
         subprocess.check_call(command)

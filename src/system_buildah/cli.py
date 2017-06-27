@@ -18,6 +18,7 @@ System Container build tool.
 
 import argparse
 import json
+import logging
 import os
 import shutil
 import subprocess
@@ -234,6 +235,15 @@ def main():  # pragma: no cover
     Main entry point.
     """
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--log-level',
+        choices=('debug', 'info', 'warn', 'fatal'), default='info')
+
+    # Parse early so we can set the logger and return fast if --help is used
+    early_args = parser.parse_args()
+    logging.basicConfig(level=logging.getLevelName(
+        early_args.log_level.upper()))
+
     subparsers = parser.add_subparsers(
         title='commands', description='commands')
 
@@ -322,8 +332,10 @@ def main():  # pragma: no cover
         help='Enable TLS Verification (Docker specific)')
 
     try:
+        logging.debug('Parsing arguments from the command line')
         parser.parse_args()
     except subprocess.CalledProcessError as error:
+        logging.debug('Stack Trace: {}'.format(error))
         parser.error('Unable to execute command: {}'.format(error))
     raise SystemExit
 

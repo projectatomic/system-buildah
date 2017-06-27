@@ -17,6 +17,7 @@ Utility functions.
 """
 
 import importlib
+import logging
 import os
 
 from contextlib import contextmanager
@@ -31,7 +32,9 @@ def _expand_path(path):
     :returns: A full path starting from the system root.
     :rtype: str
     """
-    return os.path.realpath(os.path.expanduser(path))
+    fullpath = os.path.realpath(os.path.expanduser(path))
+    logging.debug('Expanded "%s" to "%s"', path, fullpath)
+    return fullpath
 
 
 def mkdir(path):
@@ -47,7 +50,7 @@ def mkdir(path):
     try:
         os.mkdir(path)
     except FileExistsError:
-        pass
+        logging.info('The path "%s" already exists. Using it.', path)
 
     return path
 
@@ -63,8 +66,11 @@ def get_manager_class(name):
     :raises: AttributeError
     :raises: ImportError
     """
-    return getattr(importlib.import_module(
-        'system_buildah.managers.{}'.format(name)), 'Manager')
+    mod = 'system_buildah.managers.{}'.format(name)
+    logging.debug('Importing "%s" as the Image Manager', mod)
+    cls = getattr(importlib.import_module(mod), 'Manager')
+    logging.debug('Class: %s', cls)
+    return cls
 
 
 @contextmanager
@@ -76,6 +82,8 @@ def pushd(path):
     :type path: str
     """
     original_cwd = os.getcwd()
+    logging.info('Original dir: "%s". Moving to "%s"', original_cwd, path)
     os.chdir(path)
     yield
+    logging.info('Moving back to "%s" from "%s"', original_cwd, path)
     os.chdir(original_cwd)

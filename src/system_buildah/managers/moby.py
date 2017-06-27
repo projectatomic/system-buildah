@@ -16,6 +16,7 @@
 Moby/Docker specific manager.
 """
 
+import logging
 import subprocess
 
 from system_buildah import managers, util
@@ -51,11 +52,13 @@ class Manager(managers.ImageManager):
         :type tag: str
         :raises: subprocess.CalledProcessError
         """
+        logging.debug('moby build will be used')
         command = self._additional_switches(
             namespace,
             ['docker', 'build', '-t', tag, '.'])
 
         with util.pushd(namespace.path):
+            logging.info('Executing "%s"', ' '.join(command))
             subprocess.check_call(command)
 
     def tar(self, namespace, output):
@@ -68,10 +71,12 @@ class Manager(managers.ImageManager):
         :type output: str
         :raises: subprocess.CalledProcessError
         """
+        logging.debug('moby tar will be used')
         tar = '{}.tar'.format(self._normalize_filename(output))
 
         command = self._additional_switches(
             namespace,
             ['docker', 'save', '-o', tar, output])
 
+        logging.info('Executing "%s"', ' '.join(command))
         subprocess.check_call(command)

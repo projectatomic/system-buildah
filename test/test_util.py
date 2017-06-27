@@ -47,3 +47,14 @@ def test_pushd(tmpdir):
     with util.pushd(path):
         assert os.getcwd() == path  # We should have moved to dir
     assert os.getcwd() == original_cwd  # Now back to the original
+
+
+def test_get_manager_class():
+    """Verify the proper manager class is returned"""
+    from system_buildah.managers.moby import Manager
+    assert util.get_manager_class('moby') == Manager
+    try:
+        util.get_manager_class('idonotexist')
+        pytest.fail('get_manager_class did not raise on missing backend')
+    except ImportError:
+        pass

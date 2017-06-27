@@ -201,16 +201,9 @@ class BuildAction(argparse.Action):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
-        path = namespace.path
+        builder = util.get_manager_class('moby')()
         tag = values
-        command = ['docker', 'build', '-t', tag, '.']
-
-        if namespace.host:
-            command.insert(1, '--host={}'.format(namespace.host))
-        if namespace.tlsverify:
-            command.insert(1, '--tlsverify')
-        with util.pushd(path):
-            subprocess.check_call(command)
+        builder.build(namespace, tag)
 
 
 class TarAction(argparse.Action):
@@ -232,14 +225,8 @@ class TarAction(argparse.Action):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
-        tar = '{}.tar'.format(values.replace(':', '-'))
-        command = ['docker', 'save', '-o', tar, values]
-        if namespace.host:
-            command.insert(1, '--host={}'.format(namespace.host))
-        if namespace.tlsverify:
-            command.insert(1, '--tlsverify')
-
-        subprocess.check_call(command)
+        builder = util.get_manager_class('moby')()
+        builder.tar(namespace, values)
 
 
 def main():  # pragma: no cover

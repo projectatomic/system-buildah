@@ -16,6 +16,7 @@
 Utility functions.
 """
 
+import importlib
 import os
 
 from contextlib import contextmanager
@@ -49,6 +50,21 @@ def mkdir(path):
         pass
 
     return path
+
+
+def get_manager_class(name):
+    """
+    Returns the correct manager class for image work.
+
+    :param name: The name of the module.
+    :type name: str
+    :returns: The class to use for image work
+    :rtype: class
+    :raises: AttributeError
+    :raises: ImportError
+    """
+    return getattr(importlib.import_module(
+        'system_buildah.managers.{}'.format(name)), 'Manager')
 
 
 @contextmanager

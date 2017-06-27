@@ -68,7 +68,7 @@ class Manager(managers.ImageManager):
         :type output: str
         :raises: subprocess.CalledProcessError
         """
-        tar = '{}.tar'.format(output.replace(':', '-').replace('/', '-'))
+        tar = '{}.tar'.format(self._normalize_filename(output))
 
         command = self._additional_switches(
             namespace,

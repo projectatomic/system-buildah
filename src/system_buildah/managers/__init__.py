@@ -24,8 +24,19 @@ class ImageManager(metaclass=ABCMeta):
     Base class for image management.
     """
 
+    def _normalize_filename(self, data):
+        """
+        Replaces problematic chars in filesnames.
+
+        :param data: The filename to normalize
+        :type data: str
+        :returns: A normalized filename
+        :rtype: str
+        """
+        return data.replace(':', '-').replace('/', '-')
+
     @abstractmethod
-    def build(self, namespace, tag):
+    def build(self, namespace, tag):  # pragma: no cover
         """
         Builds a specific image.
 
@@ -38,7 +49,7 @@ class ImageManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def tar(self, namespace, output):
+    def tar(self, namespace, output):  # pragma: no cover
         """
         Exports a specific image to a tar file.
 

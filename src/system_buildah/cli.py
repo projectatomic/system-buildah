@@ -299,9 +299,11 @@ def main():  # pragma: no cover
     build_command = subparsers.add_parser(
         'build', help='Builds a new system container image')
     build_command.add_argument(
-        '-H', '--host', help='Remote Docker host to connect to')
+        '-H', '--host',
+        help='Remote Docker host to connect to (Docker specific)')
     build_command.add_argument(
-        '--tlsverify', action="store_true", help='Enable TLS Verification')
+        '--tlsverify', action="store_true",
+        help='Enable TLS Verification (Docker specific)')
     build_command.add_argument(
         '-p', '--path', default='.', help='Path to the Dockerfile directory')
     build_command.add_argument(
@@ -313,9 +315,11 @@ def main():  # pragma: no cover
     tar_command.add_argument(
         'image', help='Name of the image', action=TarAction)
     tar_command.add_argument(
-        '-H', '--host', help='Remote Docker host to connect to')
+        '-H', '--host',
+        help='Remote Docker host to connect to (Docker specific)')
     tar_command.add_argument(
-        '--tlsverify', action="store_true", help='Enable TLS Verification')
+        '--tlsverify', action="store_true",
+        help='Enable TLS Verification (Docker specific)')
 
     try:
         parser.parse_args()
@@ -324,5 +328,5 @@ def main():  # pragma: no cover
     raise SystemExit
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()

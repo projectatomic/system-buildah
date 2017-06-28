@@ -17,6 +17,7 @@ Tests for the cli module.
 """
 
 import argparse
+import logging
 import os
 import subprocess
 import sys
@@ -26,10 +27,27 @@ sys.path.insert(1, os.path.realpath('./src/'))
 
 from system_buildah import cli
 
+# Args that should be used with ever namespace for tests
+GLOBAL_NAMESPACE_KWARGS = {
+    'manager': 'moby',
+}
+
+
+def test_SystemBuildahAction__setup_logger(monkeypatch):
+    """Verify SystemBuildahAction__setup_logger sets the logger level"""
+    ns = argparse.Namespace(log_level='debug', **GLOBAL_NAMESPACE_KWARGS)
+
+    def assert_call(level):
+        assert level == logging.DEBUG
+
+    monkeypatch.setattr(logging, 'basicConfig', assert_call)
+
+    result = cli.SystemBuildahAction('', '')._setup_logger(ns)
+
 
 def test_GenerateFilesAction__render_service_template(monkeypatch):
     """Verify GenerateFiles__render_service_template renders"""
-    ns = argparse.Namespace(description='testing')
+    ns = argparse.Namespace(description='testing', **GLOBAL_NAMESPACE_KWARGS)
 
     result = cli.GenerateFilesAction('', '')._render_service_template(ns)
     assert type(result) is str
@@ -38,7 +56,8 @@ def test_GenerateFilesAction__render_service_template(monkeypatch):
 
 def test_GenerateFilesAction_create_manifest(monkeypatch):
     """Verify GenerateFiles_create_manifest returns proper data"""
-    ns = argparse.Namespace(default=['a=a', 'b=c', 'skipped'])
+    ns = argparse.Namespace(
+        default=['a=a', 'b=c', 'skipped'], **GLOBAL_NAMESPACE_KWARGS)
     parser = argparse.ArgumentParser()
 
     def assert_call(arg):
@@ -56,7 +75,9 @@ def test_GenerateFilesAction__generate_ocitools_command(monkeypatch):
     """
     Verify GenerateFiles__generate_ocitools_command returns proper a command
     """
-    ns = argparse.Namespace(config='--key=value --second=one ignore')
+    ns = argparse.Namespace(
+        config='--key=value --second=one ignore',
+        **GLOBAL_NAMESPACE_KWARGS)
     parser = argparse.ArgumentParser()
 
     def assert_call(arg):
@@ -82,9 +103,11 @@ def test_TarAction(monkeypatch):
             'save', '-o', tar, image]
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.TarAction('', '').__call__(
+    cli.TarAction('', '').run(
         '', argparse.Namespace(
-            host='example.org', tlsverify=True), image)
+            host='example.org', tlsverify=True,
+            **GLOBAL_NAMESPACE_KWARGS),
+        image)
 
 
 def test_BuildAction(monkeypatch):
@@ -96,9 +119,11 @@ def test_BuildAction(monkeypatch):
             'build', '-t', tag, '.']
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.BuildAction('', '').__call__(
+    cli.BuildAction('', '').run(
         '', argparse.Namespace(
-            path='.', host='example.org', tlsverify=True), tag, '')
+            path='.', host='example.org', tlsverify=True,
+            **GLOBAL_NAMESPACE_KWARGS),
+        tag, '')
 
 
 def test_GenerateDockerfileAction(tmpdir):
@@ -110,8 +135,9 @@ def test_GenerateDockerfileAction(tmpdir):
         from_base='from_base',
         maintainer='maintainer', license='license',
         summary='summary', version='version', help_text='help_text',
-        architecture='architecture', scope='scope', add_file=[])
-    cli.GenerateDockerfileAction('', '').__call__('', input, 'name', '')
+        architecture='architecture', scope='scope', add_file=[],
+        **GLOBAL_NAMESPACE_KWARGS)
+    cli.GenerateDockerfileAction('', '').run('', input, 'name', '')
     # Verify the file exists
     assert os.path.isfile(file_path)
 
@@ -127,6 +153,6 @@ def test_GenerateDockerfileAction(tmpdir):
                 assert 'FROM {}'.format(v) in data
                 continue
             # output isn't used inside the file so continue
-            elif k in ['output', 'add_file']:
+            elif k in ['output', 'add_file', 'manager']:
                 continue
             assert '{}="{}"'.format(k, v) in data

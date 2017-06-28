@@ -29,7 +29,42 @@ import jinja2
 from system_buildah import util
 
 
-class GenerateFilesAction(argparse.Action):
+class SystemBuildahAction(argparse.Action):
+    """
+    Base class for system buildah specific actions.
+    """
+
+    def _setup_logger(self, namespace):
+        """
+        Sets up the logger for use.
+
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        """
+        level = namespace.log_level or 'info'
+        logging.basicConfig(level=logging.getLevelName(level.upper()))
+
+    def __call__(
+            self, parser, namespace, values,
+            option_string=None):  # pragma: no cover
+        """
+        Sets up for execution of action.
+
+        :name parser: The argument parser in use.
+        :type parser: argparse.ArgumentParser
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        :name values: Values for the action.
+        :type values: mixed
+        :name option_string: Option string.
+        :type option_string: str or None
+        :raises: subprocess.CalledProcessError
+        """
+        self._setup_logger(namespace)
+        return self.run(parser, namespace, values, option_string)
+
+
+class GenerateFilesAction(SystemBuildahAction):
     """
     Creates new system container files.
     """
@@ -95,7 +130,7 @@ class GenerateFilesAction(argparse.Action):
                         '{} not in a=b format. Skipping...'.format(item))
         return ocitools_cmd
 
-    def __call__(self, parser, namespace, values, dest, option_string=None):
+    def run(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
 
@@ -143,12 +178,12 @@ class GenerateFilesAction(argparse.Action):
                 shutil.rmtree(temp_dir)
 
 
-class GenerateDockerfileAction(argparse.Action):
+class GenerateDockerfileAction(SystemBuildahAction):
     """
     Creates a new Dockerfile.
     """
 
-    def __call__(self, parser, namespace, values, dest, option_string=None):
+    def run(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
 
@@ -183,12 +218,12 @@ class GenerateDockerfileAction(argparse.Action):
             dockerfile.write(rendered)
 
 
-class BuildAction(argparse.Action):
+class BuildAction(SystemBuildahAction):
     """
     Builds a new system container image.
     """
 
-    def __call__(self, parser, namespace, values, dest, option_string=None):
+    def run(self, parser, namespace, values, dest, option_string=None):
         """
         Execution of the action.
 
@@ -207,12 +242,12 @@ class BuildAction(argparse.Action):
         builder.build(namespace, tag)
 
 
-class TarAction(argparse.Action):
+class TarAction(SystemBuildahAction):
     """
     Exports an image as a tar file.
     """
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def run(self, parser, namespace, values, option_string=None):
         """
         Execution of the action.
 
@@ -234,10 +269,14 @@ def main():  # pragma: no cover
     """
     Main entry point.
     """
+    # Default to info logging
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--log-level',
-        choices=('debug', 'info', 'warn', 'fatal'), default='info')
+
+    # Parent parser used by all commands
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser.add_argument(
+        '--log-level', default='info',
+        choices=('debug', 'info', 'warn', 'fatal'))
 
     # Parent parser to use with commands that may use moby/docker
     extra_moby_switches = argparse.ArgumentParser(add_help=False)
@@ -254,7 +293,8 @@ def main():  # pragma: no cover
     # generate-files command
     files_command = subparsers.add_parser(
         'generate-files',
-        help='Generates manifest.json, config.template, and service.template')
+        help='Generates manifest.json, config.template, and service.template',
+        parents=[parent_parser])
     files_command.add_argument(
         '-d', '--description',
         default='UNKNOWN', help='Description of container')
@@ -274,7 +314,8 @@ def main():  # pragma: no cover
 
     # generate-dockerfile command
     dockerfile_command = subparsers.add_parser(
-        'generate-dockerfile', help='Generate a new Dockerfile')
+        'generate-dockerfile', help='Generate a new Dockerfile',
+        parents=[parent_parser])
     dockerfile_command.add_argument(
         '-o', '--output', default='.', help='Path to write the new Dockerfile')
     dockerfile_command.add_argument(
@@ -312,7 +353,7 @@ def main():  # pragma: no cover
     # build command
     build_command = subparsers.add_parser(
         'build', help='Builds a new system container image',
-        parents=[extra_moby_switches])
+        parents=[extra_moby_switches, parent_parser])
     build_command.add_argument(
         '-p', '--path', default='.', help='Path to the Dockerfile directory')
     build_command.add_argument(
@@ -321,15 +362,11 @@ def main():  # pragma: no cover
     # tar command
     tar_command = subparsers.add_parser(
         'tar', help='Exports an image as a tar file',
-        parents=[extra_moby_switches])
+        parents=[extra_moby_switches, parent_parser])
     tar_command.add_argument(
         'image', help='Name of the image', action=TarAction)
 
     try:
-        early_args = parser.parse_args()
-        logging.basicConfig(level=logging.getLevelName(
-            early_args.log_level.upper()))
-        logging.debug('Parsing arguments from the command line')
         parser.parse_args()
     except subprocess.CalledProcessError as error:
         logging.debug('Stack Trace: {}'.format(error))

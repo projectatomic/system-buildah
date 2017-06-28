@@ -16,13 +16,19 @@
 Tests for managers.
 """
 
+import argparse
 import os
+import subprocess
 import sys
+
+import pytest
 
 # Ensure the package is in the path
 sys.path.insert(1, os.path.realpath('./src/'))
 
-from system_buildah import managers
+from system_buildah import managers, util
+from system_buildah.managers.buildah import Manager as BuildahManager
+from system_buildah.managers.moby import Manager as MobyManager
 
 
 # Dummy manager to test with
@@ -38,3 +44,70 @@ def test_ImageManager_normalize_filename():
             {'raw': 'some:file', 'expected': 'some-file'},
             {'raw': 'some/test', 'expected': 'some-test'}):
         assert im._normalize_filename(tc['raw']) == tc['expected']
+
+
+
+def test_MobyManager_tar(monkeypatch):
+    """
+    Test the Moby manager tar command.
+    """
+    mm = MobyManager()
+
+    def assert_call(arg):
+        assert arg == ['docker', 'save', '-o', 'output.tar', 'output']
+
+    monkeypatch.setattr(subprocess, 'check_call', assert_call)
+    mm.tar(argparse.Namespace(host=None, tlsverify=None), 'output')
+
+
+def test_MobyManager_build(monkeypatch):
+    """
+    Test the Moby manager tar command.
+    """
+    mm = MobyManager()
+
+    def assert_call(arg):
+        assert arg == ['docker', 'build', '-t', 'tag', '.']
+
+    monkeypatch.setattr(subprocess, 'check_call', assert_call)
+    mm.build(argparse.Namespace(host=None, tlsverify=None, path='.'), 'tag')
+
+
+def test_BuildahManager_tar(monkeypatch):
+    """
+    Test the Buildah manager tar command.
+    """
+    bm = BuildahManager()
+    output = 'output'
+
+    def assert_call(arg):
+        # First call is a buildah push
+        if arg[0] == 'buildah':
+            assert arg[0:3] == ['buildah', 'push', output]
+        # Second call is to the systems tar command
+        elif arg[0] == 'tar':
+            assert arg == ['tar', '-cf', '{}.tar'.format(output), output]
+        # Anything else is totally unexpected
+        else:
+            pytest.fail(
+                'Unexpected input to subprocess.check_call: {}'.format(arg))
+
+    def assert_mkdir(d):
+        assert d == output
+
+    monkeypatch.setattr(util, 'mkdir', assert_mkdir)
+    monkeypatch.setattr(subprocess, 'check_call', assert_call)
+    bm.tar(argparse.Namespace(host=None, tlsverify=None), output)
+
+
+def test_BuildahManager_build(monkeypatch):
+    """
+    Test the Buildah manager tar command.
+    """
+    bm = BuildahManager()
+
+    def assert_call(arg):
+        assert arg == ['buildah', 'bud', '-t', 'tag', '.']
+
+    monkeypatch.setattr(subprocess, 'check_call', assert_call)
+    bm.build(argparse.Namespace(host=None, tlsverify=None, path='.'), 'tag')

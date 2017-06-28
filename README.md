@@ -11,6 +11,7 @@ The list of requirements are limited to keep portability between OS variations a
 * docker binary and service
 * ocitools binary
 * jinja2 (python library)
+* [buildah](https://github.com/projectatomic/buildah) (optional for **experimental** manager)
 
 ## Install
 
@@ -38,10 +39,24 @@ $ system-buildah generate-files \
 $ system-buildah generate-dockerfile \
     --from-base fedora:latest \
     --output new_container_image name_of_image
+```
+
+### Moby/Docker
+```
 # Build a system container image
 $ system-buildah build \
     --path new_container_image my_system_container_image
 [...]
 # Export the image as a tar
 $ system-buildah tar my_system_container_image
+```
+
+### Buildah (Experimental)
+```
+# Build a system container image
+$ system-buildah build --manager buildah \
+    --path new_container_image my_system_container_image
+[...]
+# Export the image as a tar
+$ system-buildah tar --manager buildah my_system_container_image
 ```

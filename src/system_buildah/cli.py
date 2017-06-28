@@ -237,7 +237,7 @@ class BuildAction(SystemBuildahAction):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
-        builder = util.get_manager_class('moby')()
+        builder = util.get_manager_class(namespace.manager)()
         tag = values
         builder.build(namespace, tag)
 
@@ -261,7 +261,7 @@ class TarAction(SystemBuildahAction):
         :type option_string: str or None
         :raises: subprocess.CalledProcessError
         """
-        builder = util.get_manager_class('moby')()
+        builder = util.get_manager_class(namespace.manager)()
         builder.tar(namespace, values)
 
 
@@ -277,6 +277,8 @@ def main():  # pragma: no cover
     parent_parser.add_argument(
         '--log-level', default='info',
         choices=('debug', 'info', 'warn', 'fatal'))
+    parent_parser.add_argument(
+        '--manager', default='moby', choices=('moby', 'buildah'))
 
     # Parent parser to use with commands that may use moby/docker
     extra_moby_switches = argparse.ArgumentParser(add_help=False)

@@ -54,6 +54,15 @@ def test_GenerateFilesAction__render_service_template(monkeypatch):
     assert '\nDescription=testing\n' in result
 
 
+def test_GenerateFilesAction__render_init_template(monkeypatch):
+    """Verify GenerateFiles__render_init_template renders"""
+    ns = argparse.Namespace(**GLOBAL_NAMESPACE_KWARGS)
+
+    result = cli.GenerateFilesAction('', '')._render_init_template(ns)
+    assert type(result) is str
+    assert '#!/bin/bash' in result
+
+
 def test_GenerateFilesAction_create_manifest(monkeypatch):
     """Verify GenerateFiles_create_manifest returns proper data"""
     ns = argparse.Namespace(

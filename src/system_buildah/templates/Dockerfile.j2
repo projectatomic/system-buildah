@@ -10,6 +10,10 @@ LABEL name="{{ name }}" \
       architecture="{{ architecture }}" \
       atomic.type="system" \
       distribution-scope="{{ scope }}"
+
+# "Init script"
+mkdir -p /exports/hostfs/usr/bin
+COPY init.sh /exports/hostfs/usr/bin
 {% for hostfs_dir in hostfs_dirs -%}
 RUN mkdir -p /export/hostfs{{ hostfs_dir }}
 {% endfor -%}
@@ -19,3 +23,7 @@ COPY {{ local }} /export/hostfs{{ remote }}
 COPY manifest.json service.template config.json.template /exports/
 
 # RUN YOUR COMMAND HERE
+#RUN 
+
+# Execution
+CMD ["/usr/bin/init.sh"]

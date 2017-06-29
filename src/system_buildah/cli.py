@@ -108,6 +108,19 @@ class GenerateFilesAction(SystemBuildahAction):
             jinja2.Environment(), 'service.template.j2').render(
                 description=namespace.description)
 
+    def _render_init_template(self, namespace):
+        """
+        Renders and returns the init.sh.
+
+        :name namespace: The namespace for parsed args.
+        :type namespace: argparse.Namespace
+        :returns: Rendered template
+        :rtype: str
+        """
+        loader = jinja2.PackageLoader('system_buildah')
+        return loader.load(
+            jinja2.Environment(), 'init.sh.j2').render()
+
     def _generate_ocitools_command(self, namespace, parser):
         """
         Generates and returns the ocitools command for execution.
@@ -157,6 +170,12 @@ class GenerateFilesAction(SystemBuildahAction):
         service_out = os.path.sep.join([output, 'service.template'])
         with open(service_out, 'w') as service:
             service.write(rendered)
+
+        # Generate the init.sh file
+        rendered_init = self._render_init_template(namespace)
+        init_out = os.path.sep.join([output, 'init.sh'])
+        with open(init_out, 'w') as init:
+            init.write(rendered_init)
 
         # Generate config.json using ocitools
         temp_dir = tempfile.mkdtemp()

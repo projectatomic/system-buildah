@@ -30,12 +30,12 @@ The list of requirements are limited to keep portability between OS variations a
 ## Example
 
 ```shell
-# Generate system container files
+# Generate system image files
 $ system-buildah generate-files \
     --default=variable=value -D=another=anothervalue \
     --config="--hostname=confighost --cwd=/root" \
     new_container_image
-# Generate a system container Dockerfile
+# Generate a system image Dockerfile
 $ system-buildah generate-dockerfile \
     --from-base fedora:latest \
     --output new_container_image name_of_image

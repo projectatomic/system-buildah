@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-System Container build tool.
+System Image build tool.
 """
 
 import argparse
@@ -66,7 +66,7 @@ class SystemBuildahAction(argparse.Action):
 
 class GenerateFilesAction(SystemBuildahAction):
     """
-    Creates new system container files.
+    Creates new system image files.
     """
 
     def _create_manifest(self, namespace, parser):
@@ -220,7 +220,7 @@ class GenerateDockerfileAction(SystemBuildahAction):
 
 class BuildAction(SystemBuildahAction):
     """
-    Builds a new system container image.
+    Builds a new system image.
     """
 
     def run(self, parser, namespace, values, dest, option_string=None):
@@ -299,7 +299,7 @@ def main():  # pragma: no cover
         parents=[parent_parser])
     files_command.add_argument(
         '-d', '--description',
-        default='UNKNOWN', help='Description of container')
+        default='UNKNOWN', help='Description of image')
     files_command.add_argument(
         '-c', '--config', default=None,
         help=('Options to pass to ocitools generate. '
@@ -349,12 +349,12 @@ def main():  # pragma: no cover
               'file=/full/host/path EX: file.txt=/etc/file.txt'))
     dockerfile_command.add_argument(
         'name',
-        help='Name for the new system container image',
+        help='Name for the new system image',
         action=GenerateDockerfileAction)
 
     # build command
     build_command = subparsers.add_parser(
-        'build', help='Builds a new system container image',
+        'build', help='Builds a new system image',
         parents=[extra_moby_switches, parent_parser])
     build_command.add_argument(
         '-p', '--path', default='.', help='Path to the Dockerfile directory')

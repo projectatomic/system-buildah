@@ -5,9 +5,11 @@ Simple toolbox for building system images. Read more on the [Project Atomic Blog
 
 ## Requires
 
+**NOTE**: This code base is written to be compatible with **Python 3** and thus *will not work on older versions of Python*!
+
 The list of requirements are limited to keep portability between OS variations as simple as possible.
 
-* python3
+* **python3**
 * docker binary and service
 * ocitools binary
 * jinja2 (python library)

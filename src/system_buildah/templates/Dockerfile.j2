@@ -12,7 +12,7 @@ LABEL name="{{ name }}" \
       distribution-scope="{{ scope }}"
 
 # "Init script"
-mkdir -p /exports/hostfs/usr/bin
+RUN mkdir -p /exports/hostfs/usr/bin
 COPY init.sh /exports/hostfs/usr/bin
 {% for hostfs_dir in hostfs_dirs -%}
 RUN mkdir -p /export/hostfs{{ hostfs_dir }}

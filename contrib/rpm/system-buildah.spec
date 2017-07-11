@@ -1,5 +1,5 @@
 Name:           system-buildah
-Version:        0.0.7
+Version:        0.0.8
 Release:        1%{?dist}
 Summary:        Simple toolbox for building system containers
 
@@ -38,6 +38,9 @@ sed -i 's|/usr/bin/env python|/usr/bin/python3|' $RPM_BUILD_ROOT%{python3_siteli
 
 
 %changelog
+* Tue Jul 11 2017 Steve Milner <smilner@redhat.com> - 0.0.8-1
+- Dockerfile template bugfix
+
 * Mon Jul 10 2017 Steve Milner <smilner@redhat.com> - 0.0.7-1
 - Code clean up
 - Basic logging

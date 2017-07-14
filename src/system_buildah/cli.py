@@ -20,6 +20,7 @@ import argparse
 import json
 import logging
 import os
+import platform
 import shutil
 import subprocess
 import tempfile
@@ -290,6 +291,9 @@ def main():  # pragma: no cover
     """
     # Default to info logging
     parser = argparse.ArgumentParser()
+    # Verify that we are being executed with Python 3+
+    if int(platform.python_version_tuple()[0]) <= 2:
+        parser.error('system-buildah requires Python 3.x')
 
     # Parent parser used by all commands
     parent_parser = argparse.ArgumentParser(add_help=False)

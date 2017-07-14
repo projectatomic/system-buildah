@@ -26,6 +26,10 @@ import sys
 sys.path.insert(1, os.path.realpath('./src/'))
 
 from system_buildah import cli
+from system_buildah.actions import SystemBuildahAction
+from system_buildah.actions.tar_action import TarAction
+from system_buildah.actions.build_action import BuildAction
+from system_buildah.actions.generate_files_action import GenerateFilesAction
 
 # Args that should be used with ever namespace for tests
 GLOBAL_NAMESPACE_KWARGS = {
@@ -42,14 +46,14 @@ def test_SystemBuildahAction__setup_logger(monkeypatch):
 
     monkeypatch.setattr(logging, 'basicConfig', assert_call)
 
-    result = cli.SystemBuildahAction('', '')._setup_logger(ns)
+    result = SystemBuildahAction('', '')._setup_logger(ns)
 
 
 def test_GenerateFilesAction__render_service_template(monkeypatch):
     """Verify GenerateFiles__render_service_template renders"""
     ns = argparse.Namespace(description='testing', **GLOBAL_NAMESPACE_KWARGS)
 
-    result = cli.GenerateFilesAction('', '')._render_service_template(ns)
+    result = GenerateFilesAction('', '')._render_service_template(ns)
     assert type(result) is str
     assert '\nDescription=testing\n' in result
 
@@ -58,7 +62,7 @@ def test_GenerateFilesAction__render_init_template(monkeypatch):
     """Verify GenerateFiles__render_init_template renders"""
     ns = argparse.Namespace(**GLOBAL_NAMESPACE_KWARGS)
 
-    result = cli.GenerateFilesAction('', '')._render_init_template(ns)
+    result = GenerateFilesAction('', '')._render_init_template(ns)
     assert type(result) is str
     assert '#!/bin/bash' in result
 
@@ -74,7 +78,7 @@ def test_GenerateFilesAction_create_manifest(monkeypatch):
 
     monkeypatch.setattr(parser, '_print_message', assert_call)
 
-    result = cli.GenerateFilesAction('', '')._create_manifest(ns, parser)
+    result = GenerateFilesAction('', '')._create_manifest(ns, parser)
     assert result['defaultValues'].get('a') == 'a'
     assert result['defaultValues'].get('b') == 'c'
     assert 'skipped' not in result['defaultValues']
@@ -98,7 +102,7 @@ def test_GenerateFilesAction__generate_ocitools_command(monkeypatch):
         'ocitools', 'generate', '--read-only',
         '--key', 'value', '--second', 'one']
 
-    result = cli.GenerateFilesAction('', '')._generate_ocitools_command(ns, parser)
+    result = GenerateFilesAction('', '')._generate_ocitools_command(ns, parser)
     assert result == cmd
 
 
@@ -112,7 +116,7 @@ def test_TarAction(monkeypatch):
             'save', '-o', tar, image]
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.TarAction('', '').run(
+    TarAction('', '').run(
         '', argparse.Namespace(
             host='example.org', tlsverify=True,
             **GLOBAL_NAMESPACE_KWARGS),
@@ -128,7 +132,7 @@ def test_BuildAction(monkeypatch):
             'build', '-t', tag, '.']
 
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
-    cli.BuildAction('', '').run(
+    BuildAction('', '').run(
         '', argparse.Namespace(
             path='.', host='example.org', tlsverify=True,
             **GLOBAL_NAMESPACE_KWARGS),

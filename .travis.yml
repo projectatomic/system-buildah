@@ -1,9 +1,10 @@
 language: python
 python:
   - "3.5"
+  - "3.6"
 script:
-  - "pip install -r test-requirements.txt"
-  - "python setup.py flake8"
-  - "pytest -v"
+  - "pip install -U tox"
+  - "tox -e $TRAVIS_PYTHON_VERSION-flake8"
+  - "tox -e $TRAVIS_PYTHON_VERSION-unit"
 notifications:
   email: false

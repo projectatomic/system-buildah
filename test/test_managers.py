@@ -78,25 +78,23 @@ def test_BuildahManager_tar(monkeypatch):
     Test the Buildah manager tar command.
     """
     bm = BuildahManager()
-    output = 'output'
+    output = 'output:latest'
 
     def assert_call(arg):
         # First call is a buildah push
         if arg[0] == 'buildah':
             assert arg[0:3] == ['buildah', 'push', output]
-        # Second call is to the systems tar command
-        elif arg[0] == 'tar':
-            assert arg == ['tar', '-cf', '{}.tar'.format(output), output]
         # Anything else is totally unexpected
         else:
             pytest.fail(
                 'Unexpected input to subprocess.check_call: {}'.format(arg))
 
-    def assert_mkdir(d):
-        assert d == output
+    def assert_rename(src, dest):
+        assert src == 'output'
+        assert dest == 'output-latest.tar'
 
-    monkeypatch.setattr(util, 'mkdir', assert_mkdir)
     monkeypatch.setattr(subprocess, 'check_call', assert_call)
+    monkeypatch.setattr(os, 'rename', assert_rename)
     bm.tar(argparse.Namespace(host=None, tlsverify=None), output)
 
 

@@ -1,11 +1,11 @@
 Name:           system-buildah
-Version:        0.0.9
+Version:        0.1.0
 Release:        1%{?dist}
 Summary:        Simple toolbox for building system containers
 
 License:        GPLv3+
-URL:            https://github.com/ashcrow/system-buildah/
-Source0:        https://github.com/ashcrow/system-buildah/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+URL:            https://github.com/projectatomic/system-buildah/
+Source0:        https://github.com/projectatomic/system-buildah/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 BuildRequires:  python3-devel, python3-setuptools
@@ -38,6 +38,9 @@ sed -i 's|/usr/bin/env python|/usr/bin/python3|' $RPM_BUILD_ROOT%{python3_siteli
 
 
 %changelog
+* Fri Feb 23 2018 Steve Milner <smilner@redhat.com> - 0.1.0-1
+- buildah tar update
+
 * Mon Feb  5 2018 Steve Milner <smilner@redhat.com> - 0.0.9-1
 - Code reorganization
 

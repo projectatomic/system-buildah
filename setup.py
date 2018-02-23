@@ -32,10 +32,10 @@ test_require = extract_requirements('test-requirements.txt')
 
 setup(
     name='system-buildah',
-    version='0.0.9',
+    version='0.1.0',
     description='Simple System Image build toolbox',
     author='Steve Milner',
-    url='https://github.com/ashcrow/system-buildah',
+    url='https://github.com/projectatomic/system-buildah',
     license="GPLv3+",
 
     install_requires=install_requires,

@@ -17,6 +17,7 @@ buildah specific manager.
 """
 
 import logging
+import os
 import subprocess
 import warnings
 
@@ -56,15 +57,11 @@ class Manager(managers.ImageManager):
         :raises: subprocess.CalledProcessError
         """
         logging.debug('buildah tar will be used')
-        logging.warn(
-            'The tar result may not be usable '
-            'until this manager is stablized!')
-        out = self._normalize_filename(output)
-        util.mkdir(out)  # Ensure the directory exists
-        # NOTE: We _expand_path on out as buildah requires a full path
-        full_path = util._expand_path(out)
-        command = ['buildah', 'push', output, 'dir:/{}'.format(full_path)]
+        tar_name = self._normalize_filename(output)
+        command = ['buildah', 'push', output,
+                   'docker-archive:{}'.format(output)]
         # Export the layers
         subprocess.check_call(command)
-        # Create a tar file from the layers
-        subprocess.check_call(['tar', '-cf', '{}.tar'.format(out), out])
+        # Rename the output file
+        export_name, _ = output.split(':')
+        os.rename(export_name, '{}.tar'.format(tar_name))
